@@ -135,6 +135,99 @@ Visual documentation of the CloudNative SaaS Platform components, dashboards, an
 
 
 
+## 🏗️ Architecture Diagrams
+
+### Complete AWS Cloud-Native SaaS Platform Architecture
+
+**Location**: Architecture documentation
+
+**What to capture:**
+- Complete multi-tenant architecture diagram
+- VPC structure with 3 Availability Zones
+- EKS cluster with all namespaces and components
+- ALB with host-based routing
+- RDS PostgreSQL with high availability
+- All AWS service integrations
+- Data flow and connectivity
+
+**Screenshot:**
+<!-- Add screenshot: screenshots/complete-aws-saas-architecture.png -->
+![Complete AWS Cloud-Native SaaS Platform Architecture](screenshots/complete-aws-saas-architecture.jpeg)
+
+**Description**: Comprehensive architecture diagram showing the complete CloudNative SaaS Platform:
+
+**User Access Layer:**
+- **Multi-Tenant Users**: Tenant A (`tenant-a.app.com`), Tenant B (`tenant-b.app.com`), Tenant C (`tenant-c.app.com`)
+- **Platform Admin**: `admin.app.com`
+- **Internet**: HTTPS requests (Port 443) from external users
+
+**Load Balancing & Routing:**
+- **Application Load Balancer (ALB)**: Internet-facing, HTTPS enabled
+- **Host-Based Routing**: Routes requests to specific Kubernetes namespaces based on subdomain:
+  - `tenant-a.*` → Tenant A Namespace
+  - `tenant-b.*` → Tenant B Namespace
+  - `tenant-c.*` → Tenant C Namespace
+  - `admin.*` → Platform Namespace
+
+**Network Infrastructure:**
+- **Main VPC**: Multi-AZ deployment across 3 Availability Zones (A, B, C)
+- **Public Subnets**: One per AZ, containing NAT Gateways for outbound internet access
+- **Private Subnets - EKS**: EC2 Managed Nodes (worker nodes) with network-isolated pods
+- **Private Subnets - Data**: RDS PostgreSQL database instances
+
+**EKS Cluster Components:**
+- **Platform Namespace**: Shared services for platform administration
+- **Analytics Namespace**: Data processing workloads
+- **Monitoring Namespace**: Observability stack
+  - **Prometheus**: Metrics collection and storage
+  - **Grafana**: Visualization and dashboards
+- **Tenant Namespaces**: `tenant-a`, `tenant-b`, `tenant-c`
+  - **Isolation Mechanisms**: Network Policies + RBAC + Resource Quotas
+  - **Per-tenant isolation**: Separate service accounts, secrets, and resource limits
+
+**GitOps & Deployment:**
+- **Argo CD**: GitOps continuous delivery tool
+  - Deploys applications to tenant namespaces
+  - Manages application lifecycle
+
+**Data Layer:**
+- **RDS PostgreSQL**: Multi-tenant database
+  - **AZ A**: Primary instance
+  - **AZ B**: Standby instance (high availability)
+  - **Data Isolation**: Row-level security filtering by `tenant_id`
+  - **Connections**: Monitoring and Argo CD components connect to RDS
+
+**External AWS Services:**
+- **ECR (Elastic Container Registry)**: Docker image storage
+  - EKS cluster pulls images from ECR
+- **AWS Secrets Manager**: Secure credential storage
+  - **Per-tenant secrets isolation**: DB credentials, API keys
+  - Tenant components retrieve secrets dynamically
+- **S3 Bucket (Terraform State)**: Infrastructure as Code state storage
+  - Tenant components may access Terraform state
+
+**Multi-Tenant Request Flow:**
+1. **Request Routing**: User → Internet → ALB → Host-based routing → Kubernetes namespace
+2. **Data Isolation**: Application pods use tenant-specific credentials → RDS with row-level security → Filtered by `tenant_id`
+3. **Network Isolation**: Network policies prevent cross-tenant traffic within Kubernetes
+
+**Key Architectural Features:**
+- ✅ **Multi-AZ Deployment**: High availability across 3 availability zones
+- ✅ **EC2 Managed Node Groups**: Simplified EKS worker node management
+- ✅ **Network Isolation**: Network policies enforce tenant traffic separation
+- ✅ **Resource Governance**: Resource quotas per tenant
+- ✅ **GitOps Deployment**: Argo CD for automated application deployment
+- ✅ **Complete Observability**: Prometheus + Grafana monitoring stack
+- ✅ **Secure Secrets Management**: AWS Secrets Manager with per-tenant isolation
+- ✅ **Infrastructure as Code**: Terraform with S3 state backend
+
+**Note**: This diagram shows a generic multi-tenant architecture. The current project implementation uses:
+- Tenant names: `platform` and `analytics` (instead of `tenant-a/b/c`)
+- Database isolation: Schema-level (`tenant_platform`, `tenant_analytics`) instead of row-level security
+- Both approaches are valid multi-tenant patterns
+
+---
+
 ## 🔐 AWS Resources
 
 ### Terraform Infrastructure Outputs
