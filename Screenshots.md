@@ -162,18 +162,67 @@ Visual documentation of the CloudNative SaaS Platform components, dashboards, an
 
 ## 🔧 CI/CD Pipeline
 
-### GitHub Actions Workflow
+### CI Workflow (ci.yml)
+
+**Location**: GitHub Actions → Workflows → ci.yml
 
 **What to capture:**
-- Successful CI/CD workflow run
-- Build and push steps
-- GitOps update step
+- CI workflow triggered on push
+- All test jobs completed successfully
+- Execution times for each job
 
 **Screenshot:**
-<!-- Add screenshot: screenshots/github-actions-workflow.png -->
-![GitHub Actions Workflow](screenshots/github-actions-workflow.png)
+<!-- Add screenshot: screenshots/ci-workflow.png -->
+![CI Workflow](screenshots/ci-workflow.png)
 
-**Description**: Successful CI/CD pipeline execution building and deploying application.
+**Description**: Successful CI pipeline execution showing:
+- **backend-test**: Completed in 20s
+- **frontend-test**: Completed in 11s
+- **Security & Code Quality Checks**: Completed in 5s
+- All jobs passed with green checkmarks
+
+---
+
+### CD Workflow (cd.yml)
+
+**Location**: GitHub Actions → Workflows → cd.yml
+
+**What to capture:**
+- CD workflow triggered by workflow_run
+- Build stages (Backend and Frontend in parallel)
+- GitOps manifest update step
+
+**Screenshot:**
+<!-- Add screenshot: screenshots/cd-workflow.png -->
+![CD Workflow](screenshots/cd-workflow.png)
+
+**Description**: Successful CD pipeline execution showing:
+- **Check CI Status**: Completed in 2s (validates CI passed)
+- **Build Backend**: Completed in 43s (parallel with frontend)
+- **Build Frontend**: Completed in 26s (parallel with backend)
+- **Update GitOps Manifest**: Completed in 7s (updates image tags in GitOps repo)
+- All stages connected sequentially with successful completion
+
+---
+
+### Infrastructure Deployment Workflow (auto-apply-infra.yml)
+
+**Location**: GitHub Actions → Workflows → auto-apply-infra.yml
+
+**What to capture:**
+- Infrastructure deployment workflow
+- ArgoCD installation step
+- Sequential execution flow
+
+**Screenshot:**
+<!-- Add screenshot: screenshots/infrastructure-deployment-workflow.png -->
+![Infrastructure Deployment Workflow](screenshots/infrastructure-deployment-workflow.png)
+
+**Description**: Successful infrastructure deployment showing:
+- **Deploy Infrastructure**: Completed in 50s (Terraform apply for EKS, VPC, RDS, etc.)
+- **Install ArgoCD**: Completed in 22s (installs ArgoCD in the cluster)
+- Workflow triggered by `repository_dispatch` event
+- Both steps completed successfully with green checkmarks
 
 ---
 
